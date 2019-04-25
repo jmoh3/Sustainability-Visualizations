@@ -52,24 +52,24 @@ var displayBaseMap = function (mapData) {
     });
 
     // Legend
-    var indexToColor = d3.scale.linear()
+    const indexToColor = d3.scale.linear()
                     .domain([0, 10])
                     .range(['rgb(46,73,123)', 'rgb(71, 187, 94)']);
-    var range = d3.range(10).map(indexToColor);
-    var quant = d3.scale.quantize()
+    const range = d3.range(10).map(indexToColor);
+    const quant = d3.scale.quantize()
                         .domain([0, 200, 1000])
                         .range(range);
     
-    mapLayer.append("g")
-        .attr("class", "quantize")
-        .attr("transform", "translate(" + width / 9 + "," + height * 5/8 + ")");
+    const legend = mapLayer.append("g")
+                            .attr("class", "quantize")
+                            .attr("transform", "translate(" + width / 9 + "," + height * 5/8 + ")");
     
-    var legendQuant = d3.legend.color()
+    const legendQuant = d3.legend.color()
                         .title("Quantize")
                         .labelFormat(d3.format('.0f'))
                         .scale(quant);
     
-    mapLayer.select(".quantize").call(legendQuant);
+    legend.call(legendQuant);
 
 
     document.getElementById('yearSlider').oninput = function() {
