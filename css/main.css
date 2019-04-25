@@ -1,0 +1,24 @@
+div#chart {
+    text-align: center;
+}
+
+h3 {
+    text-align: center;
+    color:rgb(255, 255, 255);
+    margin: 0.75em;
+}
+
+h5 {
+    text-align: center;
+    color: #ffe600;
+}
+
+section.visualization-list {
+    text-align: center;
+    transform: translate(0%, 10vh);
+}
+
+body {
+    background-color: #9c83f3;
+    display: grid;
+}
