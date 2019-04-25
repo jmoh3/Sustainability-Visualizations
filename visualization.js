@@ -1,34 +1,44 @@
 
+var oldQualifer = null;
+
 // Load map data
-d3.json('dataViz/usa.json', function (error, mapData) {
+d3.json('dataViz/usa2.json', function (error, mapData) {
     var result = displayBaseMap(mapData);
     var mapLayer = result[0];
     var projection = result[1];
     var width = result[2];
     var height = result[3];
 
-    const showPercents = true;
+    var showPercents = true;
 
     var toDisplay = 'dataViz/summary_cleaned.csv';
-    displayCSV(toDisplay, mapLayer, projection, width, height, showPercents);
+    displayCSV(toDisplay, mapLayer, projection, width, height, showPercents, 'Summary');
 
-    $(document).ready(function(){
-        $(".dropdown-toggle").dropdown();
-
-        $(".dropdown-menu li a").click(function(){
-            // $(".btn:first-child").text($(this).text());
-            // $(".btn:first-child").val($(this).text());
-
+    $(document).ready(function () {
+        $(".dropdown-toggle").dropdown('toggle');
+        $('.in,.open').removeClass('in open');
+        $(".dropdown-menu li a").click(function () {
             // modify toDisplay in here
             const click = $(this).text();
             console.log('Clicked ' + click);
-            toDisplay = menuToCSV(click);
-            displayCSV(toDisplay, mapLayer, projection, width, height, showPercents);
+
+            var qualifier = oldQualifer;
+            if (click == 'Raw Number') {
+                showPercents = false;
+            } else if (click == 'Percent Change Since 1990') {
+                showPercents = true;
+            } else {
+                toDisplay = menuToCSV(click);
+                qualifier = click;
+                oldQualifer = click;
+            }
+            displayCSV(toDisplay, mapLayer, projection, width, height, showPercents, qualifier);
+            $('.in,.open').removeClass('in open');
         });
     });
 });
 
-var menuToCSV = function(menuName) {
+var menuToCSV = function (menuName) {
     if (menuName == 'Summary') {
         return 'dataViz/summary_cleaned.csv';
     } else if (menuName == 'Coal') {
@@ -53,13 +63,13 @@ var displayBaseMap = function (mapData) {
     var features = mapData.features;
     console.log("loaded map data");
 
-    var width = 960 * 2;
-    var height = 500 * 2;
+    var width = 1200;
+    var height = 500;
 
     var projection = d3.geo.mercator()
-        .scale(700)
-        .center([-95, 44])
-        .translate([width / 2, height / 2 + 200]);
+        .scale(600)
+        .center([-99, 39])
+        .translate([width / 2, height / 2]);
 
     var path = d3.geo.path()
         .projection(projection);
@@ -74,25 +84,25 @@ var displayBaseMap = function (mapData) {
 
     // title
     mapLayer.append("text")
-            .attr("x", (width / 2))             
-            .attr("y", 60)
-            .attr("text-anchor", "middle")  
-            .style("font-size", "30px") 
-            .text("Current Year: 1990");
+        .attr("x", (width / 2))
+        .attr("y", 60)
+        .attr("text-anchor", "middle")
+        .style("font-size", "30px")
+        .text("USA CO2 Visualizations");
 
 
     mapLayer.selectAll('path')
-            .data(features)
-            .enter().append('path')
-            .attr('d', path)
-            .attr('vector-effect', 'non-scaling-stroke');
+        .data(features)
+        .enter().append('path')
+        .attr('d', path)
+        .attr('vector-effect', 'non-scaling-stroke');
 
     console.log("done rendering base map!");
 
     return [mapLayer, projection, width, height];
 }
 
-const displayCSV = function(csv, mapLayer, projection, width, height, showPercents) {
+const displayCSV = function (csv, mapLayer, projection, width, height, showPercents, qualifier) {
     // monitors slider
     var data = null;
     var year_to_state_to_emission = {};
@@ -102,9 +112,9 @@ const displayCSV = function(csv, mapLayer, projection, width, height, showPercen
     var maxPercent = 0;
     var minPercent = 0;
 
-    d3.csv(csv, function(error, d) {
-        
-        const result =  initializeDicts(d);
+    d3.csv(csv, function (error, d) {
+
+        const result = initializeDicts(d);
         year_to_state_to_emission = result[0];
         year_to_state_to_percent_change = result[1];
         maxNum = result[2]
@@ -114,7 +124,7 @@ const displayCSV = function(csv, mapLayer, projection, width, height, showPercen
 
         const year = document.getElementById('yearSlider').value;
 
-        if (showPercents){
+        if (showPercents) {
             visualize(year_to_state_to_percent_change, showPercents, maxPercent, minPercent, year, mapLayer, projection);
         } else {
             visualize(year_to_state_to_emission, showPercents, maxNum, minNum, year, mapLayer, projection);
@@ -123,37 +133,42 @@ const displayCSV = function(csv, mapLayer, projection, width, height, showPercen
 
     // Legend
     const indexToColor = d3.scale.linear()
-                    .domain([0, 10])
-                    .range(['rgb(46,73,123)', 'rgb(71, 187, 94)']);
+        .domain([0, 10])
+        .range(['rgb(46,73,123)', 'rgb(71, 187, 94)']);
     const range = d3.range(10).map(indexToColor);
     const quant = d3.scale.quantize()
-                        .domain([0, 200, 1000])
-                        .range(range);
-    
+        .domain([0, 200, 1000])
+        .range(range);
+
     const legend = mapLayer.append("g")
-                            .attr("class", "quantize")
-                            .attr("transform", "translate(" + width / 9 + "," + height * 5/8 + ")");
-    
+        .attr("class", "quantize")
+        .attr("transform", "translate(" + width / 9 + "," + height * 5 / 8 + ")");
+
     const legendQuant = d3.legend.color()
-                        .title("Quantize")
-                        .labelFormat(d3.format('.0f'))
-                        .scale(quant);
-    
+        .title("Quantize")
+        .labelFormat(d3.format('.0f'))
+        .scale(quant);
+
     legend.call(legendQuant);
 
 
-    document.getElementById('yearSlider').oninput = function() {
+    document.getElementById('yearSlider').oninput = function () {
         const year = document.getElementById('yearSlider').value;
 
-        const displayTitle = 'Current Year: ' + year;
+        var displayTitle = null;
+        if (showPercents) {
+            displayTitle = '[' + qualifier + ']' + ' Percent Change in CO2 from 1990 to ' + year;
+        } else {
+            displayTitle = '[' + qualifier + ']' + ' CO2 Emissions in Millions of Tons for ' + year;
+        }
 
         mapLayer.selectAll('text').remove();
         mapLayer.append("text")
-                .attr("x", (width / 2))             
-                .attr("y", 60)
-                .attr("text-anchor", "middle")  
-                .style("font-size", "30px") 
-                .text(displayTitle);
+            .attr("x", (width / 2))
+            .attr("y", 60)
+            .attr("text-anchor", "middle")
+            .style("font-size", "30px")
+            .text(displayTitle);
 
         if (showPercents) {
             visualize(year_to_state_to_percent_change, showPercents, maxPercent, minPercent, year, mapLayer, projection);
@@ -183,7 +198,7 @@ const initializeDicts = function (data) {
             const currentEmission = parseFloat(data[row][currentYear.toString()]);
             var currentPercentChange = null;
             if (currentYear != startYear) {
-                currentPercentChange = parseFloat(data[row]['Percent_Change_' + currentYear.toString() + '_'+ startYear.toString()]);
+                currentPercentChange = parseFloat(data[row]['Percent_Change_' + currentYear.toString() + '_' + startYear.toString()]);
             }
 
             if (firstRow) {
@@ -203,7 +218,7 @@ const initializeDicts = function (data) {
             if (first) {
                 maxNum = currentEmission;
                 minNum = currentEmission;
-                maxPercent = parseFloat(data[row]['Percent_Change_' + ((startYear + 1).toString()) + '_'+ startYear.toString()]);
+                maxPercent = parseFloat(data[row]['Percent_Change_' + ((startYear + 1).toString()) + '_' + startYear.toString()]);
                 minPercent = maxPercent;
                 first = false;
             }
@@ -240,14 +255,13 @@ const visualize = function (dataDict, showPercent, globalMax, globalMin, year, m
     }
 
     mapLayer.selectAll('path')
-            .style('fill', function(d) {
-                // return color_picker(state_to_emission[d.properties['STATE_NAME']], globalMin, globalMax, globalMean);
-                return color_picker(dataDict[year][d.properties['STATE_NAME']], globalMin, globalMax, globalMean);
-            });
+        .style('fill', function (d) {
+            return color_picker(dataDict[year][d.properties['STATE_NAME']], globalMin, globalMax, globalMean);
+        });
 
 }
 
-const color_picker = function(number, globalMin, globalMax, globalMean) {
+const color_picker = function (number, globalMin, globalMax, globalMean) {
     if (globalMean == null) {
         globalMean = (globalMax + globalMin) / 2;
     }
@@ -256,12 +270,12 @@ const color_picker = function(number, globalMin, globalMax, globalMean) {
 
     if (number < globalMean) {
         hueScale = d3.scale.linear()
-                        .domain([globalMin, globalMean])
-                        .range([250, 170]);
+            .domain([globalMin, globalMean])
+            .range([250, 170]);
     } else {
         hueScale = d3.scale.linear()
-                        .domain([globalMean, globalMax])
-                        .range([60, 0]);   
+            .domain([globalMean, globalMax])
+            .range([60, 0]);
     }
 
     return d3.hsl(hueScale(number), 1, 0.5);

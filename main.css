@@ -1,13 +1,19 @@
 @import url(https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300|Josefin+Slab|Arvo|Lato|Vollkorn|Abril+Fatface|Old+Standard+TT|Droid+Sans|Lobster|Inconsolata|Montserrat|Playfair+Display|Karla|Alegreya|Libre+Baskerville|Merriweather|Lora|Archivo+Narrow|Neuton|Signika|Questrial|Fjalla+One|Bitter|Varela+Round);
 
 .background {
-fill: white;
-pointer-events: all;
+    fill: white;
+    pointer-events: all;
 }
 
 div.dropdown {
-    top: 200px;
-    right: 200px;
+    top: 100px;
+    right: 0;
+    position: absolute;
+}
+
+div.statsChooser {
+    top: 400px;
+    right: 0;
     position: absolute;
 }
 
@@ -37,7 +43,8 @@ text.big-text{
 .slider {
     position: absolute;
     -webkit-appearance: none;
-    width: 25%;
+    width: 50px;
+    top: 100px;
     height: 15px;
     border-radius: 5px;
     background: #d3d3d3;

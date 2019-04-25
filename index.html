@@ -27,7 +27,7 @@
     <input type="range" min="1990" max="2016" value="1990" class="slider" id="yearSlider">
 
     <div class="dropdown">
-        <button class="btn btn-primary dropdown-toggle" id="menu1" type="button" data-toggle="dropdown">Menu
+        <button class="btn btn-primary dropdown-toggle" id="menu1" type="button" data-toggle="dropdown">Choose CO2 Visualization
         <span class="caret"></span></button>
         <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
         <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Summary</a></li>
@@ -42,19 +42,15 @@
         <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Transportation</a></li>
         </ul>
     </div>
-        
-    <script>
-        $(document).ready(function(){
-        $(".dropdown-toggle").dropdown();
 
-        $(".dropdown-menu li a").click(function(){
-            $(".btn:first-child").text($(this).text());
-            // $(".btn:first-child").val($(this).text());
-            console.log($(this).text());
-        });
-
-        });
-    </script>
+    <div class="statsChooser">
+        <button class="btn btn-primary dropdown-toggle" id="menu1" type="button" data-toggle="stats">Choose Display Statistics
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Raw Number</a></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Percent Change Since 1990</a></li>
+        </ul>
+    </div>
 
     <!-- the visualization script -->
     <script src='visualization.js'></script>
