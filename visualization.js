@@ -60,23 +60,30 @@ var displayBaseMap = function (mapData) {
 
 const visualize = function (data, year, mapLayer, projection) {
 
-    const globalMax = 660;
-    const globalMin = 0;
-    var globalMean = 200;
+    // const globalMax = 660;
+    // const globalMin = 0;
+    // var globalMean = 200;
+
+    const globalMax = 64;
+    const globalMin = -36;
+    var globalMean = 14;
 
 
     const hueScale = d3.scale.linear()
                         .domain([globalMin, globalMax])
                         .range([0, 359]);
 
-    var state_to_num = {};
+    var state_to_emission = {};
+    var state_to_percent_change = {};
     for (row in data) {
-        state_to_num[data[row]['State']] = data[row][year];
+        state_to_emission[data[row]['State']] = data[row][year];
+        state_to_percent_change[data[row]['State']] = data[row]['Percent_Change_' + year + '_1990'];
     }
 
     mapLayer.selectAll('path')
             .style('fill', function(d) {
-                return color_picker(state_to_num[d.properties['STATE_NAME']], globalMin, globalMax, globalMean);
+                // return color_picker(state_to_emission[d.properties['STATE_NAME']], globalMin, globalMax, globalMean);
+                return color_picker(state_to_percent_change[d.properties['STATE_NAME']], globalMin, globalMax, globalMean);
             });
 
 }
