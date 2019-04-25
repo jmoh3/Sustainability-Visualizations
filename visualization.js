@@ -1,14 +1,27 @@
+var currentYear = 1975;
 
-// Using jQuery, read our data and call visualize(...) only once the page is ready:
-$(function() {
+window.onload = function () {
+
   d3.csv("exports_by_years.csv", function(error, exports) {
     // Write the data to the console for debugging:
     console.log(exports);
     // Call our visualize function:
     visualize(exports);
   });
-});
 
+  var slider = document.getElementById('myRange');
+
+  slider.onchange = function () {
+    currentYear = slider.value;
+
+    d3.csv("exports_by_years.csv", function(error, exports) {
+      // Write the data to the console for debugging:
+      console.log(exports);
+      // Call our visualize function:
+      visualize(exports);
+    });
+  }
+};
 
 var visualize = function(exports) {
   // Boilerplate:
@@ -28,10 +41,13 @@ var visualize = function(exports) {
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+  var mapLayer = svg.append("g");
+  var linesLayer = svg.append("g");
+  var legendLayer = svg.append("g");
+
   var path = d3.geoPath();
   var projection = d3.geoNaturalEarth()
       .scale(width / 5)
-      // .translate([width / 2, height / 2])
   var path = d3.geoPath()
       .projection(projection);
 
@@ -45,7 +61,7 @@ var visualize = function(exports) {
       .range(colorScheme);
 
   // Legend
-  var g = svg.append("g")
+  var g = legendLayer
     .attr("class", "legendThreshold")
     .attr("transform", "translate(20,20)");
   g.append("text")
@@ -64,46 +80,51 @@ var visualize = function(exports) {
   d3.queue()
     .defer(d3.json, "http://enjalot.github.io/wwsd/data/world/world-110m.geojson")
     .defer(d3.csv, "exports_by_years.csv", function(d) {
-      data.set(d.col_iso3, d.col_2017);
+      data.set(d.col_iso3, d["col_" + currentYear]);
     })
     .await(ready);
 
   function ready(error, topo) {
     if (error) throw error;
 
+    // projection.fitExtent([[margin.top, margin.right], [margin.top + width, margin.right + height]], topo)
+
     // Draw the map
-    svg.append("g")
-        .attr("class", "countries")
+    mapLayer.attr("class", "countries")
         .selectAll("path")
         .data(topo.features)
         .enter().append("path")
             .attr("fill", function (d){
                 // Pull data for this country
-                d.col_2017 = data["$"+d.id] || 0;
+                d["col_" + currentYear] = data["$"+d.id] || 0;
                 // Set the color
-                return colorScale(d.col_2017);
+                return colorScale(d["col_" + currentYear]);
             })
             .attr("d", path);
   }
 
 
-  d3.csv("datasets/cites_1975.csv", function(error, cites) {
-    d3.csv("countries_codes_and_coordinates.csv", function(error, coords) {
+  d3.csv("datasets/cites_" + currentYear + ".csv", function(error, cites) {
+    d3.csv("country-capitals.csv", function(error, coords) {
+
+      var newProjection = d3.geoNaturalEarth()
+          .scale(width / 5);
       
       var getCoords = function(tradeData, coordinates, countryType, i) {
         try {
           var country = tradeData[i][countryType];
+          console.log(country);
 
           var lat = coordinates.filter(function f(d) {
-            return d["Alpha-2 code"].includes(country)
-          })[0]["Latitude (average)"];
+            return d["CountryCode"].includes(country)
+          })[0]["CapitalLatitude"];
 
           var long = coordinates.filter(function f(d) {
-            return d["Alpha-2 code"].includes(country)
-          })[0]["Longitude (average)"];
+            return d["CountryCode"].includes(country)
+          })[0]["CapitalLongitude"];
         
 
-          return [parseInt(lat.replace(/"/g,"").replace(" ","")), parseInt(long.replace(/"/g,"").replace(" ",""))];
+          return [parseFloat(long), parseFloat(lat)];
         } catch (err) {
           return [0, 0];
         }
@@ -116,8 +137,8 @@ var visualize = function(exports) {
         tradeData.map(function (d, i) {
           var feature = {
             "coordinates": [
-              projection(getCoords(tradeData, coords, "Exporter", i)),
-              projection(getCoords(tradeData, coords, "Importer", i))],
+              newProjection(getCoords(tradeData, coords, "Exporter", i)),
+              newProjection(getCoords(tradeData, coords, "Importer", i))],
             "properties": {
               "origin": d["Origin"],
               "exporter": d["Exporter"],
@@ -130,14 +151,13 @@ var visualize = function(exports) {
       }
 
       var formattedData = formatTradeData(cites)
+      console.log(projection([33, 65]))
 
-      svg.selectAll("line")
+      linesLayer.selectAll("line")
         .data(formattedData)
         .enter()
         .append("line")
         .attr("x1", function(d, i) {
-          console.log("HERE")
-          console.log(d.coordinates[0][0])
           return d.coordinates[0][0] || 0;
         })
         .attr("y1", function(d, i) {

@@ -28,6 +28,41 @@
       <!-- Our d3.js visualization will appear in #chart -->
       <h4>Change in trade of endangered/protected species over time</h4>
         <h5>A CS 296-25 project by Jackie Oh</h5>
+        <div class="slidecontainer">
+          <input type="range" min="1975" max="2017" value="1975" class="slider" id="myRange">
+          <style>
+              .slider {
+                  -webkit-appearance: none;
+                  width: 25%;
+                  height: 15px;
+                  position: fixed;
+                  border-radius: 5px;
+                  background: #d3d3d3;
+                  outline: none;
+                  opacity: 0.7;
+                  -webkit-transition: .2s;
+                  transition: opacity .2s;
+              }
+  
+              .slider::-webkit-slider-thumb {
+                  -webkit-appearance: none;
+                  appearance: none;
+                  width: 25px;
+                  height: 25px;
+                  border-radius: 50%;
+                  background: #de2d26;
+                  cursor: pointer;
+              }
+  
+              .slider::-moz-range-thumb {
+                  width: 25px;
+                  height: 25px;
+                  border-radius: 50%;
+                  background: #de2d26;
+                  cursor: pointer;
+              }
+          </style>
+      </div>
       <div id="map"></div>
     </div>
   </body>
