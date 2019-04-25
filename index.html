@@ -1,81 +1,62 @@
 <!doctype html>
 <html>
-  <head>
-    <title>Base template for simple d3.js visualizations</title>
+
+<head>
+    <title>Project 1 - Illinois Students By Curriculum</title>
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="css/main.css" />
 
     <!-- jQuery and lodash -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.min.js"></script>
 
     <!-- d3.js -->
-    <script src="https://d3js.org/d3.v4.min.js"></script>
-
-    <script src="https://d3js.org/d3-array.v1.min.js"></script>
-    <script src="https://d3js.org/d3-geo.v1.min.js"></script>
-
-    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-    <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
 
     <!-- Our visualization code -->
-    <script src="visualization.js"></script>
-  </head>
-  <body>
-    <div class="container">
-      <!-- Our d3.js visualization will appear in #chart -->
-      <h4>Change in trade of endangered/protected species over time</h4>
-        <h5>A CS 296-25 project by Jackie Oh</h5>
-        <div class="slidecontainer">
-          <input type="range" min="1975" max="2017" value="1975" class="slider" id="myRange">
-          <style>
-              .slider {
-                  -webkit-appearance: none;
-                  width: 25%;
-                  height: 15px;
-                  position: fixed;
-                  border-radius: 5px;
-                  background: #d3d3d3;
-                  outline: none;
-                  opacity: 0.7;
-                  -webkit-transition: .2s;
-                  transition: opacity .2s;
-              }
-  
-              .slider::-webkit-slider-thumb {
-                  -webkit-appearance: none;
-                  appearance: none;
-                  width: 25px;
-                  height: 25px;
-                  border-radius: 50%;
-                  background: #de2d26;
-                  cursor: pointer;
-              }
-  
-              .slider::-moz-range-thumb {
-                  width: 25px;
-                  height: 25px;
-                  border-radius: 50%;
-                  background: #de2d26;
-                  cursor: pointer;
-              }
-          </style>
-      </div>
-      <div id="map"></div>
-    </div>
-  </body>
-  <!-- <html> -->
-    <head>
-        <meta charset="utf-8">
-        <link href="/d3-geomap/css/d3.geomap.css" rel="stylesheet">
-        <script src="/d3-geomap/vendor/d3.geomap.dependencies.min.js"></script>
-        <script src="/d3-geomap/js/d3.geomap.min.js"></script>
-    </head>
-    <!-- <body>
-        <div id="map"></div>
-    </body> -->
-<!-- </html> -->
+    <!-- <script src="visualization.js"></script> -->
+</head>
 
+<body>
+    <div class="container">
+        <section class="heading">
+            <h3>Sustainability Visualizations</h3>
+            <h5>
+                A CS 296 data visualization project by Jackie Oh and Jatin Mathur
+            </h5>
+        </section>
+        <section class="visualization-list container-fluid">
+            <table class="table table-condensed">
+                <th>
+                    Visualization
+                </th>
+                <th>
+                    Description
+                </th>
+                <tr>
+                    <td>
+                        <!-- Indicates caution should be taken with this action -->
+                        <button type="button" class="btn btn-success" onclick="location.href='/cites-visualization/'">Trade of Threatened and Endangered Species
+                    <td>
+                        A look the trade of species protected under the CITES treaty from 1975 to 2018.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <!-- Indicates caution should be taken with this action -->
+                        <button type="button" class="btn btn-warning" onclick="location.href='/jatin/'">Other visualization
+                    <td>
+                        Other
+                    </td>
+                </tr>
+            </table>
+        </section>
+    </div>
+</body>
 </html>

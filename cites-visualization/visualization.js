@@ -113,16 +113,14 @@ var visualize = function(exports) {
       var getCoords = function(tradeData, coordinates, countryType, i) {
         try {
           var country = tradeData[i][countryType];
-          console.log(country);
-
-          var lat = coordinates.filter(function f(d) {
-            return d["CountryCode"].includes(country)
-          })[0]["CapitalLatitude"];
 
           var long = coordinates.filter(function f(d) {
             return d["CountryCode"].includes(country)
           })[0]["CapitalLongitude"];
-        
+
+          var lat = coordinates.filter(function f(d) {
+            return d["CountryCode"].includes(country)
+          })[0]["CapitalLatitude"];
 
           return [parseFloat(long), parseFloat(lat)];
         } catch (err) {
