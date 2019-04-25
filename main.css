@@ -5,9 +5,18 @@ fill: white;
 pointer-events: all;
 }
 
-.map-layer {
-fill: white;
-stroke: black;
+div.dropdown {
+    top: 200px;
+    right: 200px;
+    position: absolute;
+}
+
+.svg-container {
+    fill: white;
+    stroke: black;
+    z-index: -1;
+    top: 25px;
+    position: relative;
 }
 
 .effect-layer{
@@ -26,10 +35,10 @@ text.big-text{
 
 
 .slider {
+    position: absolute;
     -webkit-appearance: none;
     width: 25%;
     height: 15px;
-    position: fixed;
     border-radius: 5px;
     background: #d3d3d3;
     outline: none;

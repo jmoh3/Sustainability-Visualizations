@@ -1,17 +1,63 @@
+
 // Load map data
 d3.json('dataViz/usa.json', function (error, mapData) {
-    displayBaseMap(mapData);
+    var result = displayBaseMap(mapData);
+    var mapLayer = result[0];
+    var projection = result[1];
+    var width = result[2];
+    var height = result[3];
+
+    const showPercents = true;
+
+    var toDisplay = 'dataViz/summary_cleaned.csv';
+    displayCSV(toDisplay, mapLayer, projection, width, height, showPercents);
+
+    $(document).ready(function(){
+        $(".dropdown-toggle").dropdown();
+
+        $(".dropdown-menu li a").click(function(){
+            // $(".btn:first-child").text($(this).text());
+            // $(".btn:first-child").val($(this).text());
+
+            // modify toDisplay in here
+            const click = $(this).text();
+            console.log('Clicked ' + click);
+            toDisplay = menuToCSV(click);
+            displayCSV(toDisplay, mapLayer, projection, width, height, showPercents);
+        });
+    });
 });
 
+var menuToCSV = function(menuName) {
+    if (menuName == 'Summary') {
+        return 'dataViz/summary_cleaned.csv';
+    } else if (menuName == 'Coal') {
+        return 'dataViz/coal_cleaned.csv';
+    } else if (menuName == 'Electricity') {
+        return 'dataViz/electricity_cleaned.csv';
+    } else if (menuName == 'Petroleum') {
+        return 'dataViz/petroleum_cleaned.csv';
+    } else if (menuName == 'Industrial') {
+        return 'dataViz/industrial_cleaned.csv';
+    } else if (menuName == 'Commercial') {
+        return 'dataViz/commercial_cleaned.csv';
+    } else if (menuName == 'Residential') {
+        return 'dataViz/residential_cleaned.csv';
+    } else {
+        return 'dataViz/transportation_cleaned.csv';
+    }
+}
+
 var displayBaseMap = function (mapData) {
+
     var features = mapData.features;
     console.log("loaded map data");
 
-    var width = 960 * 3;
-    var height = 500 * 3;
+    var width = 960 * 2;
+    var height = 500 * 2;
 
     var projection = d3.geo.mercator()
-        .scale(1000)
+        .scale(700)
         .center([-95, 44])
         .translate([width / 2, height / 2 + 200]);
 
@@ -43,12 +89,36 @@ var displayBaseMap = function (mapData) {
 
     console.log("done rendering base map!");
 
+    return [mapLayer, projection, width, height];
+}
+
+const displayCSV = function(csv, mapLayer, projection, width, height, showPercents) {
     // monitors slider
     var data = null;
-    d3.csv('dataViz/summary_cleaned.csv', function(error, d) {
-        data = d;
+    var year_to_state_to_emission = {};
+    var year_to_state_to_percent_change = {};
+    var maxNum = 0;
+    var minNum = 0;
+    var maxPercent = 0;
+    var minPercent = 0;
+
+    d3.csv(csv, function(error, d) {
+        
+        const result =  initializeDicts(d);
+        year_to_state_to_emission = result[0];
+        year_to_state_to_percent_change = result[1];
+        maxNum = result[2]
+        minNum = result[3];
+        maxPercent = result[4];
+        minPercent = result[5];
+
         const year = document.getElementById('yearSlider').value;
-        visualize(data, year, mapLayer, projection);
+
+        if (showPercents){
+            visualize(year_to_state_to_percent_change, showPercents, maxPercent, minPercent, year, mapLayer, projection);
+        } else {
+            visualize(year_to_state_to_emission, showPercents, maxNum, minNum, year, mapLayer, projection);
+        }
     });
 
     // Legend
@@ -85,39 +155,94 @@ var displayBaseMap = function (mapData) {
                 .style("font-size", "30px") 
                 .text(displayTitle);
 
-                
-        
-        mapLayer.selectAll('circle').remove();
-        visualize(data, year, mapLayer, projection);
+        if (showPercents) {
+            visualize(year_to_state_to_percent_change, showPercents, maxPercent, minPercent, year, mapLayer, projection);
+        } else {
+            visualize(year_to_state_to_emission, showPercents, maxNum, minNum, year, mapLayer, projection);
+        }
     }
 }
 
-const visualize = function (data, year, mapLayer, projection) {
+const initializeDicts = function (data) {
+    const startYear = 1990;
+    const endYear = 2016;
 
-    // const globalMax = 660;
-    // const globalMin = 0;
-    // var globalMean = 200;
+    var maxNum = 0;
+    var minNum = 0;
+    var maxPercent = 0;
+    var minPercent = 0;
+    var first = true;
+    var firstRow = true;
 
-    const globalMax = 64;
-    const globalMin = -36;
-    var globalMean = 0;
+    var year_to_state_to_emission = {};
+    var year_to_state_to_percent_change = {};
 
-
-    const hueScale = d3.scale.linear()
-                        .domain([globalMin, globalMax])
-                        .range([0, 359]);
-
-    var state_to_emission = {};
-    var state_to_percent_change = {};
     for (row in data) {
-        state_to_emission[data[row]['State']] = data[row][year];
-        state_to_percent_change[data[row]['State']] = data[row]['Percent_Change_' + year + '_1990'];
+        for (var currentYear = startYear; currentYear <= endYear; currentYear++) {
+            const currentState = data[row]['State'];
+            const currentEmission = parseFloat(data[row][currentYear.toString()]);
+            var currentPercentChange = null;
+            if (currentYear != startYear) {
+                currentPercentChange = parseFloat(data[row]['Percent_Change_' + currentYear.toString() + '_'+ startYear.toString()]);
+            }
+
+            if (firstRow) {
+                year_to_state_to_emission[currentYear] = {};
+                year_to_state_to_emission[currentYear][currentState] = currentEmission;
+                if (currentYear != startYear) {
+                    year_to_state_to_percent_change[currentYear] = {};
+                    year_to_state_to_percent_change[currentYear][currentState] = currentPercentChange;
+                }
+            } else {
+                year_to_state_to_emission[currentYear][currentState] = currentEmission;
+                if (currentYear != startYear) {
+                    year_to_state_to_percent_change[currentYear][currentState] = currentPercentChange;
+                }
+            }
+
+            if (first) {
+                maxNum = currentEmission;
+                minNum = currentEmission;
+                maxPercent = parseFloat(data[row]['Percent_Change_' + ((startYear + 1).toString()) + '_'+ startYear.toString()]);
+                minPercent = maxPercent;
+                first = false;
+            }
+
+            if (maxNum < currentEmission) {
+                maxNum = currentEmission;
+            } else if (minNum > currentEmission) {
+                minNum = currentEmission;
+            }
+
+            if (currentYear != startYear) {
+                if (maxPercent < currentPercentChange) {
+                    maxPercent = currentPercentChange;
+                } else if (minPercent > currentPercentChange) {
+                    minPercent = currentPercentChange;
+                }
+            }
+        }
+        firstRow = false;
+    }
+
+    return [year_to_state_to_emission, year_to_state_to_percent_change, maxNum, minNum, maxPercent, minPercent];
+}
+
+const visualize = function (dataDict, showPercent, globalMax, globalMin, year, mapLayer, projection) {
+
+    if (showPercent && year == '1990') {
+        return;
+    }
+
+    var globalMean = 0;
+    if (!showPercent) {
+        globalMean = (globalMax + globalMin) / 2;
     }
 
     mapLayer.selectAll('path')
             .style('fill', function(d) {
                 // return color_picker(state_to_emission[d.properties['STATE_NAME']], globalMin, globalMax, globalMean);
-                return color_picker(state_to_percent_change[d.properties['STATE_NAME']], globalMin, globalMax, globalMean);
+                return color_picker(dataDict[year][d.properties['STATE_NAME']], globalMin, globalMax, globalMean);
             });
 
 }
