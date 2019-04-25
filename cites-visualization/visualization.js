@@ -10,16 +10,25 @@ window.onload = function () {
   });
 
   var slider = document.getElementById('myRange');
+  var yearLabel = document.getElementById('year_label').innerHTML;
+
+  console.log(yearLabel)
 
   slider.onchange = function () {
     currentYear = slider.value;
+    yearLabel = currentYear;
     document.getElementById('map').children[0].remove();
 
-    visualize()
+    d3.csv("exports_by_years.csv", function(error, exports) {
+      // Write the data to the console for debugging:
+      console.log(exports);
+      // Call our visualize function:
+      visualize(exports);
+    });
   }
 };
 
-var visualize = function() {
+var visualize = function(exports) {
   // Boilerplate:
   var margin = { top: 50, right: 50, bottom: 50, left: 50 },
      width = 960 - margin.left - margin.right,
@@ -47,13 +56,43 @@ var visualize = function() {
   var path = d3.geoPath()
       .projection(projection);
 
+  // Create color scale
+  console.log(currentYear)
+
+  var maxExport = d3.max(exports, function(d) {
+    return parseFloat(d["col_" + currentYear])
+  })
+  var minExport = d3.min(exports, function(d) {
+    return parseFloat(d["col_" + currentYear])
+  })
+
+  console.log(minExport)
+  console.log(maxExport)
+
+  var incremementVal = parseInt(maxExport / 6);
+
+  var threshholds = [minExport]
+
+  for (i = 1; i < 8; i++) {
+    threshholds.push(threshholds[i - 1] + incremementVal)
+  }
+
+  console.log(threshholds)
+
+  var labels = []
+
+  for (i = 1; i < 8; i++) {
+    labels.push(threshholds[i-1] + "-" + threshholds[i])
+  }
+
+  console.log(labels)
 
   // Data and color scale
   var data = d3.map();
   var colorScheme = d3.schemeReds[6];
   colorScheme.unshift("#eee")
   var colorScale = d3.scaleThreshold()
-      .domain([1, 6, 11, 1000, 100000, 100100000])
+      .domain(threshholds)
       .range(colorScheme);
 
   // Legend
@@ -65,7 +104,6 @@ var visualize = function() {
     .attr("x", 0)
     .attr("y", -6)
     .text("Exports");
-  var labels = ['0', '1-5', '6-10', '11-25', '26-100', '101-1000', '> 1000'];
   var legend = d3.legendColor()
     .labels(function (d) { return labels[d.i]; })
     .shapePadding(4)
@@ -83,8 +121,6 @@ var visualize = function() {
   function ready(error, topo) {
     if (error) throw error;
 
-    // projection.fitExtent([[margin.top, margin.right], [margin.top + width, margin.right + height]], topo)
-
     // Draw the map
     mapLayer.attr("class", "countries")
         .selectAll("path")
@@ -94,7 +130,7 @@ var visualize = function() {
                 // Pull data for this country
                 d["col_" + currentYear] = data["$"+d.id] || 0;
                 // Set the color
-                return colorScale(d["col_" + currentYear]);
+                return colorScale(parseFloat(d["col_" + currentYear]));
             })
             .attr("d", path);
   }
@@ -165,7 +201,7 @@ var visualize = function() {
         })
         .attr("stroke-width", 2)
         .attr("stroke", "black")
-        .attr("opacity", "0.001");
+        .attr("opacity", "0.1");
 
     });
   });
