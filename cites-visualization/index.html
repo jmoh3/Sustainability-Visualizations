@@ -12,6 +12,7 @@
 
     <!-- d3.js -->
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script>
 
     <script src="https://d3js.org/d3-array.v1.min.js"></script>
     <script src="https://d3js.org/d3-geo.v1.min.js"></script>
@@ -19,6 +20,8 @@
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.js"></script>
+
+    <link rel="stylesheet" href="css/main.css"/>
 
     <!-- Our visualization code -->
     <script src="visualization.js"></script>
@@ -28,44 +31,11 @@
       <!-- Our d3.js visualization will appear in #chart -->
       <h4>Change in trade of endangered/protected species over time</h4>
         <h5>A CS 296-25 project by Jackie Oh</h5>
+        <div id="year_label">
+          <h5>1975</h5>
+        </div>
         <div class="slidecontainer">
           <input type="range" min="1975" max="2017" value="1975" class="slider" id="myRange">
-          <style>
-              .slider {
-                  -webkit-appearance: none;
-                  width: 25%;
-                  height: 15px;
-                  position: fixed;
-                  border-radius: 5px;
-                  background: #d3d3d3;
-                  outline: none;
-                  opacity: 0.7;
-                  -webkit-transition: .2s;
-                  transition: opacity .2s;
-              }
-  
-              .slider::-webkit-slider-thumb {
-                  -webkit-appearance: none;
-                  appearance: none;
-                  width: 25px;
-                  height: 25px;
-                  border-radius: 50%;
-                  background: #de2d26;
-                  cursor: pointer;
-              }
-  
-              .slider::-moz-range-thumb {
-                  width: 25px;
-                  height: 25px;
-                  border-radius: 50%;
-                  background: #de2d26;
-                  cursor: pointer;
-              }
-          </style>
-      </div>
-      <div id="year_label">
-          <br>
-        <h5>1975</h5>
       </div>
       <div id="map"></div>
     </div>

@@ -10,13 +10,11 @@ window.onload = function () {
   });
 
   var slider = document.getElementById('myRange');
-  var yearLabel = document.getElementById('year_label').innerHTML;
-
-  console.log(yearLabel)
+  currentYear = slider.value;
 
   slider.onchange = function () {
     currentYear = slider.value;
-    yearLabel = currentYear;
+    document.getElementById('year_label').innerHTML = currentYear;
     document.getElementById('map').children[0].remove();
 
     d3.csv("exports_by_years.csv", function(error, exports) {
@@ -52,7 +50,8 @@ var visualize = function(exports) {
 
   var path = d3.geoPath();
   var projection = d3.geoNaturalEarth()
-      .scale(width / 5)
+      // .scale(width / 2 / Math.PI)
+      // .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
   var path = d3.geoPath()
       .projection(projection);
 
@@ -98,12 +97,12 @@ var visualize = function(exports) {
   // Legend
   var g = legendLayer
     .attr("class", "legendThreshold")
-    .attr("transform", "translate(20,20)");
+    .attr("transform", "translate(" + margin.top + "," + margin.left + ")");
   g.append("text")
     .attr("class", "caption")
     .attr("x", 0)
     .attr("y", -6)
-    .text("Exports");
+    .text("Number of Exports");
   var legend = d3.legendColor()
     .labels(function (d) { return labels[d.i]; })
     .shapePadding(4)
@@ -136,7 +135,7 @@ var visualize = function(exports) {
   }
 
 
-  d3.csv("datasets/cites_" + currentYear + ".csv", function(error, cites) {
+  d3.csv("minimized_datasets/cites_" + currentYear + ".csv", function(error, cites) {
     d3.csv("country-capitals.csv", function(error, coords) {
 
       var newProjection = d3.geoNaturalEarth()
@@ -183,7 +182,14 @@ var visualize = function(exports) {
       var formattedData = formatTradeData(cites)
       console.log(projection([33, 65]))
 
-      linesLayer.selectAll("line")
+      var tip = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .html(function (d, i) {
+            return "Exporter: " + d.properties.exporter + ", Importer: " + d.properties.destination;
+        });
+
+      var lines = linesLayer.selectAll("line")
         .data(formattedData)
         .enter()
         .append("line")
@@ -201,8 +207,11 @@ var visualize = function(exports) {
         })
         .attr("stroke-width", 2)
         .attr("stroke", "black")
-        .attr("opacity", "0.1");
-
+        .attr("opacity", "0.1")
+        .on('mouseover', tip.show)
+        .on('mouseout', tip.hide);
+        
+        lines.call(tip);
     });
   });
 };
