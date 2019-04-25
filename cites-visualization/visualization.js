@@ -13,17 +13,13 @@ window.onload = function () {
 
   slider.onchange = function () {
     currentYear = slider.value;
+    document.getElementById('map').children[0].remove();
 
-    d3.csv("exports_by_years.csv", function(error, exports) {
-      // Write the data to the console for debugging:
-      console.log(exports);
-      // Call our visualize function:
-      visualize(exports);
-    });
+    visualize()
   }
 };
 
-var visualize = function(exports) {
+var visualize = function() {
   // Boilerplate:
   var margin = { top: 50, right: 50, bottom: 50, left: 50 },
      width = 960 - margin.left - margin.right,
@@ -168,7 +164,8 @@ var visualize = function(exports) {
           return d.coordinates[1][1] || 0;
         })
         .attr("stroke-width", 2)
-        .attr("stroke", "black");
+        .attr("stroke", "black")
+        .attr("opacity", "0.001");
 
     });
   });
