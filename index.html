@@ -4,7 +4,7 @@
 <head>
 
     <!-- current commented out because it is not necessary, but in the future I could have the need for a stylesheet -->
-    <!-- <link rel='stylesheet' href='main.css'> -->
+    <link rel='stylesheet' href='main.css'>
 
     <!-- loads version 3 of the d3.js library -->
     <script src="https://d3js.org/d3.v3.min.js"></script>
@@ -15,6 +15,8 @@
 </head>
 
 <body>
+
+    <input type="range" min="1990" max="2016" value="1990" class="slider" id="yearSlider">
 
     <!-- the visualization script -->
     <script src='visualization.js'></script>
