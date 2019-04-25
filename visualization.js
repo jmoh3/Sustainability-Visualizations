@@ -16,155 +16,141 @@ var visualize = function(exports) {
      width = 960 - margin.left - margin.right,
      height = 100 - margin.top - margin.bottom,
      padding = 50;
-
-      
-  var svg = d3.select("#map")
-    .datum(exports);
   
   // Visualization Code:
 
-  var format = function(d) {
-    d = d / 1000;
-    return d3.format(',.02f')(d) + 'k';
+  var svg = d3.select("svg");
+
+  var path = d3.geoPath();
+  var projection = d3.geoNaturalEarth()
+      .scale(width / 2 / Math.PI)
+      .translate([width / 2, height / 2])
+  var path = d3.geoPath()
+      .projection(projection);
+
+  // Data and color scale
+  var data = d3.map();
+  var colorScheme = d3.schemeReds[6];
+  colorScheme.unshift("#eee")
+  var colorScale = d3.scaleThreshold()
+      .domain([1, 6, 11, 26, 101, 1001])
+      .range(colorScheme);
+
+  // Legend
+  var g = svg.append("g")
+    .attr("class", "legendThreshold")
+    .attr("transform", "translate(20,20)");
+  g.append("text")
+    .attr("class", "caption")
+    .attr("x", 0)
+    .attr("y", -6)
+    .text("Students");
+  var labels = ['0', '1-5', '6-10', '11-25', '26-100', '101-1000', '> 1000'];
+  var legend = d3.legendColor()
+    .labels(function (d) { return labels[d.i]; })
+    .shapePadding(4)
+    .scale(colorScale);
+  svg.select(".legendThreshold")
+    .call(legend);
+
+  d3.queue()
+    .defer(d3.json, "http://enjalot.github.io/wwsd/data/world/world-110m.geojson")
+    .defer(d3.csv, "exports_by_years.csv", function(d) {
+      console.log(d.col_2017);
+      data.set(d.col_iso3, +d.col_2017);
+      console.log(data.col_2017.replace("$", ""))
+    })
+    .await(ready);
+
+  function ready(error, topo) {
+    if (error) throw error;
+    
+    console.log("here");
+    console.log(data["$ARE"]);
+    console.log();
+
+    // Draw the map
+    svg.append("g")
+        .attr("class", "countries")
+        .selectAll("path")
+        .data(topo.features)
+        .enter().append("path")
+            .attr("fill", function (d){
+                console.log("HERE")
+                // Pull data for this country
+                d.col_2017 = data.get(d.id) || 0;
+                // Set the color
+                return colorScale(d.col_2017);
+            })
+            .attr("d", path);
   }
 
 
-  var map = d3.geomap.choropleth()
-    .geofile('/d3-geomap/topojson/world/countries.json')
-    .colors(colorbrewer.OrRd[9])
-    .column('2017')
-    .format(format)
-    .unitId('iso3')
-    .legend(true);
-  
-  map.draw(d3.select('#map'));
+  // d3.csv("datasets/cites_1975.csv", function(error, cites) {
+  //   d3.csv("countries_codes_and_coordinates.csv", function(error, coords) {
 
-  console.log(map.path.centroid(100, 100));
-
-  // console.log(d3.select("#map > svg > g.units.zoom > path.unit.unit-ARG").centroid());
-  // console.log(map.svg.insert('g', 'g.units').attr('class', 'tectonics zoom').selectAll('path'));
-
-  d3.csv("datasets/cites_1975.csv", function(error, cites) {
-    d3.csv("countries_codes_and_coordinates.csv", function(error, coords) {
-
-      // map.svg
-      //   .insert('g', 'g.units')
-      //   .attr('class', 'tectonics zoom')
-      //   .selectAll('path')
-      //   .data(topojson.feature(cites, b.objects.tec).features)
-      //   .enter()
-      //   .append('path')
-      //   .attr('d', map.path);
-
-      var projection = d3.geoMercator();
-
-      // console.log(document.querySelector('#map > svg > g.units.zoom > path.unit.unit-AFG').getBoundingClientRect());
+  //     var projection = d3.geoMercator();
       
 
-      var getCoords = function(tradeData, coordinates, countryType, i) {
-        try {
-          var country = tradeData[i][countryType];
+  //     var getCoords = function(tradeData, coordinates, countryType, i) {
+  //       try {
+  //         var country = tradeData[i][countryType];
 
-          // console.log(country);
-          // console.log(d3.select("#map > svg > g.units.zoom > path.unit.unit-ESH").path)
-          
-          // console.log(coordinates.filter(function f(d) {
-          //   return d["Alpha-2 code"].includes(country)
-          // })[0]["Latitude (average)"]);
+  //         var lat = coordinates.filter(function f(d) {
+  //           return d["Alpha-2 code"].includes(country)
+  //         })[0]["Latitude (average)"];
 
-          var lat = coordinates.filter(function f(d) {
-            return d["Alpha-2 code"].includes(country)
-          })[0]["Latitude (average)"];
-
-          var long = coordinates.filter(function f(d) {
-            return d["Alpha-2 code"].includes(country)
-          })[0]["Longitude (average)"];
+  //         var long = coordinates.filter(function f(d) {
+  //           return d["Alpha-2 code"].includes(country)
+  //         })[0]["Longitude (average)"];
         
 
-          return [parseInt(lat.replace(/"/g,"").replace(" ","")), parseInt(long.replace(/"/g,"").replace(" ",""))];
-        } catch (err) {
-          return [0, 0];
-        }
-  
-      }
+  //         return [parseInt(lat.replace(/"/g,"").replace(" ","")), parseInt(long.replace(/"/g,"").replace(" ",""))];
+  //       } catch (err) {
+  //         return [0, 0];
+  //       }
+  //     }
 
-      function formatTradeData(tradeData) {
-        var my_data = [];
-        tradeData.map(function (d, i) {
-          var feature = {
-            "coordinates": [
-              projection(getCoords(tradeData, coords, "Exporter", i)),
-              projection(getCoords(tradeData, coords, "Importer", i))],
-            "properties": {
-              "origin": d["Origin"],
-              "exporter": d["Exporter"],
-              "destination": d["Importer"]
-            }
-          };
-          my_data.push(feature);
-        });
-        return my_data;
-      }
+  //     console.log(getCoords(cites, coords, "Origin", 0))
 
-      var formattedData = formatTradeData(cites)
-      // console.log(formattedData[0].coordinates)
+  //     function formatTradeData(tradeData) {
+  //       var my_data = [];
+  //       tradeData.map(function (d, i) {
+  //         var feature = {
+  //           "coordinates": [
+  //             projection(getCoords(tradeData, coords, "Exporter", i)),
+  //             projection(getCoords(tradeData, coords, "Importer", i))],
+  //           "properties": {
+  //             "origin": d["Origin"],
+  //             "exporter": d["Exporter"],
+  //             "destination": d["Importer"]
+  //           }
+  //         };
+  //         my_data.push(feature);
+  //       });
+  //       return my_data;
+  //     }
 
-      svg.selectAll("line")
-        .data(formattedData)
-        .enter()
-        .append("line")
-        .attr("x1", function(d, i) {
-          return formattedData[i].coordinates[0][0]
-        })
-        .attr("y1", function(d, i) {
-          return formattedData[i].coordinates[0][1]
-        })
-        .attr("x2", function(d, i) {
-          return formattedData[i].coordinates[1][0]
-        })
-        .attr("y2", function(d, i) {
-          return formattedData[i].coordinates[1][1]
-        })
+  //     var formattedData = formatTradeData(cites)
+  //     console.log(formattedData[0].coordinates)
 
-    //   var line = svg.selectAll("arc") 
-    //     .data(formattedData)
-    //     .enter()
-    //     .append("path")
-    //     .attr("class", "arc")
-    //     .attr("fill", "none")
-    //     .attr("stroke", "red")
-    //     .attr("stroke-width", "2")
-    //     .attr("stroke-linecap", "round")
-    //     .attr("opacity", function(d, i) {
-    //       console.log("here!")
-    //       return "1"
-    //     })
-    //     .attr("d", this.path)
-    //     .on("click",  function(d) {
-    //       console.log("Clicked line!")
-    //   });
+      // svg.selectAll("line")
+      //   .data(formattedData)
+      //   .enter()
+      //   .append("line")
+      //   .attr("x1", function(d, i) {
+      //     return formattedData[i].coordinates[0][0]
+      //   })
+      //   .attr("y1", function(d, i) {
+      //     return formattedData[i].coordinates[0][1]
+      //   })
+      //   .attr("x2", function(d, i) {
+      //     return formattedData[i].coordinates[1][0]
+      //   })
+      //   .attr("y2", function(d, i) {
+      //     return formattedData[i].coordinates[1][1]
+      //   })
 
-    //   console.log();
-
-    });
-  });
-
-  // console.log(topojson.feature(b, b.objects.tec).features);
-
-  // svg.selectAll("line")
-  //   .data(data)
-  //   .enter()
-  //   .append("line")
-  //   .attr("x1", function(d, i) {
-  //     d3.selectAll("#map").attr("cx")
-  //   })
-  //   .attr("y1", function(d, i) {
-      
-  //   })
-  //   .attr("x2", function(d, i) {
-      
-  //   })
-  //   .attr("y2", function(d, i) {
-      
-  //   })
+//     });
+//   });
 };
