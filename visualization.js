@@ -32,7 +32,7 @@ var displayBaseMap = function (mapData) {
         .attr("y", 60)
         .attr("text-anchor", "middle")  
         .style("font-size", "30px") 
-        .text("USA Vizualization");
+        .text("CS296 Final Viz");
 
 
     mapLayer.selectAll('path')
@@ -62,27 +62,42 @@ const visualize = function (data, year, mapLayer, projection) {
 
     const globalMax = 660;
     const globalMin = 0;
+    var globalMean = 200;
 
-    var radiusScale = d3.scale.linear()
+
+    const hueScale = d3.scale.linear()
                         .domain([globalMin, globalMax])
-                        .range([2, 30]);
+                        .range([0, 359]);
 
-    mapLayer.selectAll('circle')
-            .data(data).enter()
-            .append('circle')
-            .attr('cx', function (d) {
-                const toProject = [d['Longitude'], d['Latitude']];
-                return projection(toProject)[0];
-            })
-            .attr('cy', function (d) {
-                const toProject = [d['Longitude'], d['Latitude']];
-                return projection(toProject)[1];
-            })
-            .attr('r', function (d) {
-                return radiusScale(d[year]);
-            })
-            .attr('fill', function (d) {
-                return d3.hsl(0, 1, 0.5);
+    var state_to_num = {};
+    for (row in data) {
+        state_to_num[data[row]['State']] = data[row][year];
+    }
+
+    mapLayer.selectAll('path')
+            .style('fill', function(d) {
+                return color_picker(state_to_num[d.properties['STATE_NAME']], globalMin, globalMax, globalMean);
             });
+
+}
+
+const color_picker = function(emission, globalMin, globalMax, globalMean) {
+    if (globalMean == null) {
+        globalMean = (globalMax + globalMin) / 2;
+    }
+
+    var hueScale = null;
+
+    if (emission < globalMean) {
+        hueScale = d3.scale.linear()
+                        .domain([globalMin, globalMean])
+                        .range([250, 170]);
+    } else {
+        hueScale = d3.scale.linear()
+                        .domain([globalMean, globalMax])
+                        .range([60, 0]);   
+    }
+
+    return d3.hsl(hueScale(emission), 1, 0.5);
 
 }
