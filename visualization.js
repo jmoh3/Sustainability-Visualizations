@@ -28,18 +28,18 @@ var displayBaseMap = function (mapData) {
 
     // title
     mapLayer.append("text")
-        .attr("x", (width / 2))             
-        .attr("y", 60)
-        .attr("text-anchor", "middle")  
-        .style("font-size", "30px") 
-        .text("CS296 Final Viz");
+            .attr("x", (width / 2))             
+            .attr("y", 60)
+            .attr("text-anchor", "middle")  
+            .style("font-size", "30px") 
+            .text("Current Year: 1990");
 
 
     mapLayer.selectAll('path')
-        .data(features)
-        .enter().append('path')
-        .attr('d', path)
-        .attr('vector-effect', 'non-scaling-stroke');
+            .data(features)
+            .enter().append('path')
+            .attr('d', path)
+            .attr('vector-effect', 'non-scaling-stroke');
 
     console.log("done rendering base map!");
 
@@ -51,9 +51,43 @@ var displayBaseMap = function (mapData) {
         visualize(data, year, mapLayer, projection);
     });
 
+    // Legend
+    var indexToColor = d3.scale.linear()
+                    .domain([0, 10])
+                    .range(['rgb(46,73,123)', 'rgb(71, 187, 94)']);
+    var range = d3.range(10).map(indexToColor);
+    var quant = d3.scale.quantize()
+                        .domain([0, 200, 1000])
+                        .range(range);
+    
+    mapLayer.append("g")
+        .attr("class", "quantize")
+        .attr("transform", "translate(" + width / 9 + "," + height * 5/8 + ")");
+    
+    var legendQuant = d3.legend.color()
+                        .title("Quantize")
+                        .labelFormat(d3.format('.0f'))
+                        .scale(quant);
+    
+    mapLayer.select(".quantize").call(legendQuant);
+
+
     document.getElementById('yearSlider').oninput = function() {
-        mapLayer.selectAll('circle').remove();
         const year = document.getElementById('yearSlider').value;
+
+        const displayTitle = 'Current Year: ' + year;
+
+        mapLayer.selectAll('text').remove();
+        mapLayer.append("text")
+                .attr("x", (width / 2))             
+                .attr("y", 60)
+                .attr("text-anchor", "middle")  
+                .style("font-size", "30px") 
+                .text(displayTitle);
+
+                
+        
+        mapLayer.selectAll('circle').remove();
         visualize(data, year, mapLayer, projection);
     }
 }
@@ -66,7 +100,7 @@ const visualize = function (data, year, mapLayer, projection) {
 
     const globalMax = 64;
     const globalMin = -36;
-    var globalMean = 14;
+    var globalMean = 0;
 
 
     const hueScale = d3.scale.linear()
@@ -88,14 +122,14 @@ const visualize = function (data, year, mapLayer, projection) {
 
 }
 
-const color_picker = function(emission, globalMin, globalMax, globalMean) {
+const color_picker = function(number, globalMin, globalMax, globalMean) {
     if (globalMean == null) {
         globalMean = (globalMax + globalMin) / 2;
     }
 
     var hueScale = null;
 
-    if (emission < globalMean) {
+    if (number < globalMean) {
         hueScale = d3.scale.linear()
                         .domain([globalMin, globalMean])
                         .range([250, 170]);
@@ -105,6 +139,6 @@ const color_picker = function(emission, globalMin, globalMax, globalMean) {
                         .range([60, 0]);   
     }
 
-    return d3.hsl(hueScale(emission), 1, 0.5);
+    return d3.hsl(hueScale(number), 1, 0.5);
 
 }
