@@ -1,0 +1,70 @@
+@import url(https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300|Josefin+Slab|Arvo|Lato|Vollkorn|Abril+Fatface|Old+Standard+TT|Droid+Sans|Lobster|Inconsolata|Montserrat|Playfair+Display|Karla|Alegreya|Libre+Baskerville|Merriweather|Lora|Archivo+Narrow|Neuton|Signika|Questrial|Fjalla+One|Bitter|Varela+Round);
+
+.background {
+    fill: white;
+    pointer-events: all;
+}
+
+div.dropdown {
+    top: 100px;
+    left: 70%;
+    position: absolute;
+}
+
+div.statsChooser {
+    top: 400px;
+    left: 70%;
+    position: absolute;
+}
+
+.svg-container {
+    fill: white;
+    stroke: black;
+    z-index: -1;
+    top: 10%;
+    position: relative;
+    z-index: -1;
+}
+
+.legend-layer {
+    position: fixed;
+}
+
+.effect-layer{
+pointer-events:none;
+}
+
+#yearSlider {
+    position: absolute;
+    -webkit-appearance: none;
+    width: 400px;
+    top: 90px;
+    left: 400px;
+    height: 15px;
+    border-radius: 5px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.mySlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #B22222;
+    cursor: pointer;
+}
+
+.mySlider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #B22222;
+    cursor: pointer;
+}
+
+

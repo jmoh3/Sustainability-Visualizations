@@ -1,59 +1,62 @@
-<!DOCTYPE html>
-<meta charset="utf-8">
+<!doctype html>
+<html>
 
 <head>
+    <title>Project 1 - Illinois Students By Curriculum</title>
 
-    <!-- loads version 3 of the d3.js library -->
-    <script src="https://d3js.org/d3.v3.min.js"></script>
-    <script src = "https://cdnjs.cloudflare.com/ajax/libs/d3-legend/1.13.0/d3-legend.min.js"></script>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
+    <link rel="stylesheet" href="css/main.css" />
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <!-- jQuery and lodash -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.min.js"></script>
 
-    <!-- current commented out because it is not necessary, but in the future I could have the need for a stylesheet -->
-    <link rel='stylesheet' href='main.css'>
+    <!-- d3.js -->
+    <script src="https://d3js.org/d3.v5.min.js"></script>
 
-    <!-- initializes the SVG element -->
-    <div class='svg-container'>
-        <svg></svg>
-    </div>
-
+    <!-- Our visualization code -->
+    <!-- <script src="visualization.js"></script> -->
 </head>
 
 <body>
-    
-    <input type="range" min="1990" max="2016" value="1990" class="mySlider" id="yearSlider">
-
-    <div class="dropdown">
-        <button class="btn btn-primary dropdown-toggle" id="menu1" type="button" data-toggle="dropdown">Choose CO2 Visualization
-        <span class="caret"></span></button>
-        <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
-        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Summary</a></li>
-        <li role="presentation" class="divider"></li>
-        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Coal</a></li>
-        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Electricity</a></li>
-        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Petroleum</a></li>
-        <li role="presentation" class="divider"></li>
-        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Industrial</a></li>
-        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Commercial</a></li>
-        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Residential</a></li>
-        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Transportation</a></li>
-        </ul>
+    <div class="container">
+        <section class="heading">
+            <h3>Sustainability Visualizations</h3>
+            <h5>
+                A CS 296 data visualization project by Jackie Oh and Jatin Mathur
+            </h5>
+        </section>
+        <section class="visualization-list container-fluid">
+            <table class="table table-condensed">
+                <th>
+                    Visualization
+                </th>
+                <th>
+                    Description
+                </th>
+                <tr>
+                    <td>
+                        <!-- Indicates caution should be taken with this action -->
+                        <button type="button" class="btn btn-success" onclick="location.href='/cites-visualization/'">Trade of Threatened and Endangered Species
+                    <td>
+                        A look the trade of species protected under the CITES treaty from 1975 to 2018.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <!-- Indicates caution should be taken with this action -->
+                        <button type="button" class="btn btn-primary" onclick="location.href='/co2-visualization/'">CO2 Emissions By State Over Time
+                    <td>
+                        A visualization of CO2 emissions based on source, use-case, or cumulative amount.
+                    </td>
+                </tr>
+            </table>
+        </section>
     </div>
-
-    <div class="statsChooser">
-        <button class="btn btn-primary dropdown-toggle" id="menu1" type="button" data-toggle="stats">Choose Display Statistics
-        <span class="caret"></span></button>
-        <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
-        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Raw Number</a></li>
-        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Percent Change Since 1990</a></li>
-        </ul>
-    </div>
-
-    <!-- the visualization script -->
-    <script src='visualization.js'></script>
-
 </body>
-
+</html>
