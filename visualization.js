@@ -1,5 +1,6 @@
 
-var oldQualifer = null;
+// used for the title, acts as "memory" to prevent a title switch in the case of when the user wants to see different stats
+var oldQualifer = 'Summary';
 
 // Load map data
 d3.json('dataViz/usa2.json', function (error, mapData) {
@@ -69,7 +70,7 @@ var displayBaseMap = function (mapData) {
     var projection = d3.geo.mercator()
         .scale(600)
         .center([-99, 39])
-        .translate([width / 2, height / 2]);
+        .translate([width / 2, height / 2 + 25]);
 
     var path = d3.geo.path()
         .projection(projection);
