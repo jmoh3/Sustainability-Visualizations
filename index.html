@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+
+    <!-- loads version 3 of the d3.js library -->
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/d3-legend/1.13.0/d3-legend.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+    <!-- current commented out because it is not necessary, but in the future I could have the need for a stylesheet -->
+    <link rel='stylesheet' href='main.css'>
+
+    <!-- initializes the SVG element -->
+    <div class='svg-container'>
+        <svg></svg>
+    </div>
+
+</head>
+
+<body>
+    
+    <input type="range" min="1990" max="2016" value="1990" class="mySlider" id="yearSlider">
+
+    <div class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" id="menu1" type="button" data-toggle="dropdown">Choose CO2 Visualization
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Summary</a></li>
+        <li role="presentation" class="divider"></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Coal</a></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Electricity</a></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Petroleum</a></li>
+        <li role="presentation" class="divider"></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Industrial</a></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Commercial</a></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Residential</a></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Transportation</a></li>
+        </ul>
+    </div>
+
+    <div class="statsChooser">
+        <button class="btn btn-primary dropdown-toggle" id="menu1" type="button" data-toggle="stats">Choose Display Statistics
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Raw Number</a></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Percent Change Since 1990</a></li>
+        </ul>
+    </div>
+
+    <!-- the visualization script -->
+    <script src='visualization.js'></script>
+
+</body>
+
