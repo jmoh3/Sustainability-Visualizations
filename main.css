@@ -7,13 +7,13 @@
 
 div.dropdown {
     top: 100px;
-    right: 0;
+    left: 70%;
     position: absolute;
 }
 
 div.statsChooser {
     top: 400px;
-    right: 0;
+    left: 70%;
     position: absolute;
 }
 
@@ -23,29 +23,23 @@ div.statsChooser {
     z-index: -1;
     top: 10%;
     position: relative;
+    z-index: -1;
+}
+
+.legend-layer {
+    position: fixed;
 }
 
 .effect-layer{
 pointer-events:none;
 }
 
-text {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-weight: 300;
-}
-
-text.big-text{
-    font-size: 30px;
-    font-weight: 400;
-}
-
-
 #yearSlider {
     position: absolute;
     -webkit-appearance: none;
-    width: 25%;
+    width: 400px;
     top: 10%;
-    left: 50%;
+    left: 400px;
     height: 15px;
     border-radius: 5px;
     background: #d3d3d3;
@@ -61,7 +55,7 @@ text.big-text{
     width: 25px;
     height: 25px;
     border-radius: 50%;
-    background: #4CAF50;
+    background: #B22222;
     cursor: pointer;
 }
 
@@ -69,7 +63,8 @@ text.big-text{
     width: 25px;
     height: 25px;
     border-radius: 50%;
-    background: #4CAF50;
+    background: #B22222;
     cursor: pointer;
 }
-  
+
+

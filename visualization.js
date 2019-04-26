@@ -2,6 +2,16 @@
 // used for the title, acts as "memory" to prevent a title switch in the case of when the user wants to see different stats
 var oldQualifer = 'Summary';
 
+// used to make the legend and choose colors
+const redList = ['rgb(139,0,0)', 'rgb(163,3,3)', 'rgb(173,34,34)',
+                    'rgb(178,57,57)', 'rgb(145,40,40)', 'rgb(163,55,55)', 'rgb(183,73,73)',
+                    'rgb(165,81,81)', 'rgb(183,115,115)', 'rgb(183,134,134)', 'rgb(219,173,173)'];
+
+// used to make the legend and choose colors
+const blueList = ['rgb(0,30,160)', 'rgb(7,40,181)', 'rgb(20,51,188)', 'rgb(35,63,183)',
+                    'rgb(61,100,198)', 'rgb(48,88,196)', 'rgb(69,107,204)', 'rgb(86,124,188)',
+                    'rgb(94,140,186)', 'rgb(100,166,196)', 'rgb(145,213,224)', 'rgb(170,217,224)', 'rgb(205,241,247)'];
+
 // Load map data
 d3.json('dataViz/usa2.json', function (error, mapData) {
     var result = displayBaseMap(mapData);
@@ -10,7 +20,7 @@ d3.json('dataViz/usa2.json', function (error, mapData) {
     var width = result[2];
     var height = result[3];
 
-    var showPercents = true;
+    var showPercents = false;
 
     var toDisplay = 'dataViz/summary_cleaned.csv';
     displayCSV(toDisplay, mapLayer, projection, width, height, showPercents, 'Summary');
@@ -81,15 +91,17 @@ var displayBaseMap = function (mapData) {
         .attr('height', height);
 
     var mapLayer = svg.append('g')
-        .classed('map-layer', true);
+                        .classed('map-layer', true);
 
     // title
     mapLayer.append("text")
-        .attr("x", (width / 2))
-        .attr("y", 60)
-        .attr("text-anchor", "middle")
-        .style("font-size", "30px")
-        .text("USA CO2 Visualizations");
+            .classed("text", true)
+            .attr("x", (width / 2))
+            .attr("y", 60)
+            .attr("text-anchor", "middle")
+            .style("font-size", "30px")
+            .style("font-family", "Arial")
+            .text("USA CO2 Visualizations");
 
 
     mapLayer.selectAll('path')
@@ -110,6 +122,7 @@ const displayCSV = function (csv, mapLayer, projection, width, height, showPerce
     var year_to_state_to_percent_change = {};
     var maxNum = 0;
     var minNum = 0;
+    var meanNum = 0;
     var maxPercent = 0;
     var minPercent = 0;
 
@@ -120,37 +133,27 @@ const displayCSV = function (csv, mapLayer, projection, width, height, showPerce
         year_to_state_to_percent_change = result[1];
         maxNum = result[2]
         minNum = result[3];
-        maxPercent = result[4];
-        minPercent = result[5];
+        meanNum = result[4];
+        maxPercent = result[5];
+        minPercent = result[6];
+
+        // Legend
+        if (showPercents) {
+            createLegend(mapLayer, width, height, maxPercent, minPercent, meanNum, showPercents);
+        } else {
+            createLegend(mapLayer, width, height, maxNum, minNum, meanNum, showPercents);
+        }
 
         const year = document.getElementById('yearSlider').value;
 
+        // colors the countries
         if (showPercents) {
-            visualize(year_to_state_to_percent_change, showPercents, maxPercent, minPercent, year, mapLayer, projection);
+            visualize(year_to_state_to_percent_change, showPercents, maxPercent, minPercent, meanNum, year, mapLayer, projection);
         } else {
-            visualize(year_to_state_to_emission, showPercents, maxNum, minNum, year, mapLayer, projection);
+            visualize(year_to_state_to_emission, showPercents, maxNum, minNum, meanNum, year, mapLayer, projection);
         }
+
     });
-
-    // Legend
-    const indexToColor = d3.scale.linear()
-        .domain([0, 10])
-        .range(['rgb(46,73,123)', 'rgb(71, 187, 94)']);
-    const range = d3.range(10).map(indexToColor);
-    const quant = d3.scale.quantize()
-        .domain([0, 200, 1000])
-        .range(range);
-
-    const legend = mapLayer.append("g")
-        .attr("class", "quantize")
-        .attr("transform", "translate(" + width / 9 + "," + height * 5 / 8 + ")");
-
-    const legendQuant = d3.legend.color()
-        .title("Quantize")
-        .labelFormat(d3.format('.0f'))
-        .scale(quant);
-
-    legend.call(legendQuant);
 
 
     document.getElementById('yearSlider').oninput = function () {
@@ -172,9 +175,9 @@ const displayCSV = function (csv, mapLayer, projection, width, height, showPerce
             .text(displayTitle);
 
         if (showPercents) {
-            visualize(year_to_state_to_percent_change, showPercents, maxPercent, minPercent, year, mapLayer, projection);
+            visualize(year_to_state_to_percent_change, showPercents, maxPercent, minPercent, meanNum, year, mapLayer, projection);
         } else {
-            visualize(year_to_state_to_emission, showPercents, maxNum, minNum, year, mapLayer, projection);
+            visualize(year_to_state_to_emission, showPercents, maxNum, minNum, meanNum, year, mapLayer, projection);
         }
     }
 }
@@ -185,6 +188,8 @@ const initializeDicts = function (data) {
 
     var maxNum = 0;
     var minNum = 0;
+    var meanNum = 0;
+    var count = 0;
     var maxPercent = 0;
     var minPercent = 0;
     var first = true;
@@ -237,22 +242,81 @@ const initializeDicts = function (data) {
                     minPercent = currentPercentChange;
                 }
             }
+            meanNum += currentEmission;
+            count++;
         }
         firstRow = false;
     }
-
-    return [year_to_state_to_emission, year_to_state_to_percent_change, maxNum, minNum, maxPercent, minPercent];
+    meanNum = meanNum / count;
+    return [year_to_state_to_emission, year_to_state_to_percent_change, maxNum, minNum, meanNum, maxPercent, minPercent];
 }
 
-const visualize = function (dataDict, showPercent, globalMax, globalMin, year, mapLayer, projection) {
+const createLegend = function(mapLayer, width, height, maxNum, minNum, meanNum, showPercents) {
+    
+    if (showPercents) {
+        meanNum = 0;
+    }
 
+    const indexToColor = function(min, max, mean, num) {
+        if (num <= mean) {
+            const hueScale = d3.scale.quantize()
+                                .domain([min, mean])
+                                .range(blueList);
+            return hueScale(num);
+        } else {
+            const hueScale = d3.scale.quantize()
+                                .domain([max, mean])
+                                .range(redList);
+            return hueScale(num);
+        }
+    }
+
+    const boxes = 10;
+    var domain = [];
+    var range = [];
+    for (var i = 0; i < boxes / 2; i++) {
+        const lowerBound = (meanNum - minNum) / (boxes / 2) * i + minNum;
+        const upperBound = (meanNum - minNum) / (boxes / 2) * (i + 1) + minNum;
+        const num = (lowerBound + upperBound) / 2;
+        domain.push(lowerBound.toString().slice(0, 5) + " to " + upperBound.toString().slice(0, 5));
+        range.push(indexToColor(minNum, maxNum, meanNum, num));
+    }
+    for (var i = 0; i < boxes / 2; i++) {
+        const lowerBound = (maxNum - meanNum) / (boxes / 2) * i + meanNum;
+        const upperBound = (maxNum - meanNum) / (boxes / 2) * (i + 1) + meanNum;
+        const num = (lowerBound + upperBound) / 2;
+        domain.push(lowerBound.toString().slice(0, 5) + " to " + upperBound.toString().slice(0, 5));
+        range.push(indexToColor(minNum, maxNum, meanNum, num));
+    }
+
+    const quant = d3.scale.ordinal()
+                            .domain(domain)
+                            .range(range);
+
+    mapLayer.select('g').remove();
+    const legend = mapLayer.append("g")
+                            .attr("class", "quantize")
+                            .attr("transform", "translate(" + width / 9 + "," + height / 2 + ")")
+                            .style('font-family', 'Garamond')
+                            .style('font-size', '16')
+                            .style('position', 'absolute');
+
+    const legendQuant = d3.legend.color()
+                                    .title("Color Legend")
+                                    .labelFormat(d3.format('.0f'))
+                                    .scale(quant);
+
+    legend.call(legendQuant);
+}
+
+const visualize = function (dataDict, showPercent, globalMax, globalMin, globalMean, year, mapLayer, projection) {
+    // no difference!
     if (showPercent && year == '1990') {
         return;
     }
 
-    var globalMean = 0;
-    if (!showPercent) {
-        globalMean = (globalMax + globalMin) / 2;
+    if (showPercent) {
+        globalMean = 0;
     }
 
     mapLayer.selectAll('path')
@@ -263,22 +327,21 @@ const visualize = function (dataDict, showPercent, globalMax, globalMin, year, m
 }
 
 const color_picker = function (number, globalMin, globalMax, globalMean) {
-    if (globalMean == null) {
-        globalMean = (globalMax + globalMin) / 2;
-    }
-
+    
     var hueScale = null;
 
+    // const combinedList = blueList.concat(redList.reverse());
+    
     if (number < globalMean) {
-        hueScale = d3.scale.linear()
-            .domain([globalMin, globalMean])
-            .range([250, 170]);
+        hueScale = d3.scale.quantize()
+                            .domain([globalMin, globalMean])
+                            .range(blueList);
     } else {
-        hueScale = d3.scale.linear()
-            .domain([globalMean, globalMax])
-            .range([60, 0]);
+        hueScale = d3.scale.quantize()
+                            .domain([globalMax, globalMean])
+                            .range(redList);
     }
 
-    return d3.hsl(hueScale(number), 1, 0.5);
+    return hueScale(number);
 
 }
