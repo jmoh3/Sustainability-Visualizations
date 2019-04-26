@@ -1,2 +1,5 @@
 cites-visualization/datasets/
 cites-visualization/cites_trade/
+
+./ipynb_checkpoints
+co2-visualization/ipynb_checkpoints
