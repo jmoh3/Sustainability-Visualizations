@@ -14,16 +14,34 @@ const blueList = ['rgb(0,30,160)', 'rgb(7,40,181)', 'rgb(20,51,188)', 'rgb(35,63
 
 // Load map data
 d3.json('dataViz/usa2.json', function (error, mapData) {
-    var result = displayBaseMap(mapData);
-    var mapLayer = result[0];
-    var projection = result[1];
-    var width = result[2];
-    var height = result[3];
+
+    var width = 1200;
+    var height = 500;
+
+    var projection = d3.geo.mercator()
+        .scale(600)
+        .center([-99, 39])
+        .translate([width / 2, height / 2 + 25]);
+
+    var path = d3.geo.path()
+                        .projection(projection);
+
+    // Set svg width & height
+    var svg = d3.select('svg')
+        .attr('width', width)
+        .attr('height', height);
+
+    var mapLayer = svg.append('g')
+                        .classed('map-layer', true);
+    var legendLayer = svg.append('g')
+                        .classed('map=layer', true);
+
+    displayBaseMap(mapData, mapLayer, path, width, height);
 
     var showPercents = false;
 
     var toDisplay = 'dataViz/summary_cleaned.csv';
-    displayCSV(toDisplay, mapLayer, projection, width, height, showPercents, 'Summary');
+    displayCSV(toDisplay, mapLayer, legendLayer, projection, width, height, showPercents, 'Summary');
 
     $(document).ready(function () {
         $(".dropdown-toggle").dropdown('toggle');
@@ -43,11 +61,36 @@ d3.json('dataViz/usa2.json', function (error, mapData) {
                 qualifier = click;
                 oldQualifer = click;
             }
-            displayCSV(toDisplay, mapLayer, projection, width, height, showPercents, qualifier);
+            displayCSV(toDisplay, mapLayer, legendLayer, projection, width, height, showPercents, qualifier);
             $('.in,.open').removeClass('in open');
         });
     });
 });
+
+var displayBaseMap = function (mapData, mapLayer, path, width, height) {
+
+    var features = mapData.features;
+    console.log("loaded map data");
+
+    // title
+    mapLayer.append("text")
+            .classed("text", true)
+            .attr("x", (width / 2))
+            .attr("y", 60)
+            .attr("text-anchor", "middle")
+            .style("font-size", "30px")
+            .style("font-family", "Arial")
+            .text("USA CO2 Visualizations");
+
+
+    mapLayer.selectAll('path')
+        .data(features)
+        .enter().append('path')
+        .attr('d', path)
+        .attr('vector-effect', 'non-scaling-stroke');
+
+    console.log("done rendering base map!");
+}
 
 var menuToCSV = function (menuName) {
     if (menuName == 'Summary') {
@@ -69,55 +112,8 @@ var menuToCSV = function (menuName) {
     }
 }
 
-var displayBaseMap = function (mapData) {
-
-    var features = mapData.features;
-    console.log("loaded map data");
-
-    var width = 1200;
-    var height = 500;
-
-    var projection = d3.geo.mercator()
-        .scale(600)
-        .center([-99, 39])
-        .translate([width / 2, height / 2 + 25]);
-
-    var path = d3.geo.path()
-        .projection(projection);
-
-    // Set svg width & height
-    var svg = d3.select('svg')
-        .attr('width', width)
-        .attr('height', height);
-
-    var mapLayer = svg.append('g')
-                        .classed('map-layer', true);
-
-    // title
-    mapLayer.append("text")
-            .classed("text", true)
-            .attr("x", (width / 2))
-            .attr("y", 60)
-            .attr("text-anchor", "middle")
-            .style("font-size", "30px")
-            .style("font-family", "Arial")
-            .text("USA CO2 Visualizations");
-
-
-    mapLayer.selectAll('path')
-        .data(features)
-        .enter().append('path')
-        .attr('d', path)
-        .attr('vector-effect', 'non-scaling-stroke');
-
-    console.log("done rendering base map!");
-
-    return [mapLayer, projection, width, height];
-}
-
-const displayCSV = function (csv, mapLayer, projection, width, height, showPercents, qualifier) {
+const displayCSV = function (csv, mapLayer, legendLayer, projection, width, height, showPercents, qualifier) {
     // monitors slider
-    var data = null;
     var year_to_state_to_emission = {};
     var year_to_state_to_percent_change = {};
     var maxNum = 0;
@@ -139,9 +135,9 @@ const displayCSV = function (csv, mapLayer, projection, width, height, showPerce
 
         // Legend
         if (showPercents) {
-            createLegend(mapLayer, width, height, maxPercent, minPercent, meanNum, showPercents);
+            createLegend(legendLayer, width, height, maxPercent, minPercent, meanNum, showPercents);
         } else {
-            createLegend(mapLayer, width, height, maxNum, minNum, meanNum, showPercents);
+            createLegend(legendLayer, width, height, maxNum, minNum, meanNum, showPercents);
         }
 
         const year = document.getElementById('yearSlider').value;
@@ -251,7 +247,7 @@ const initializeDicts = function (data) {
     return [year_to_state_to_emission, year_to_state_to_percent_change, maxNum, minNum, meanNum, maxPercent, minPercent];
 }
 
-const createLegend = function(mapLayer, width, height, maxNum, minNum, meanNum, showPercents) {
+const createLegend = function(legendLayer, width, height, maxNum, minNum, meanNum, showPercents) {
     
     if (showPercents) {
         meanNum = 0;
@@ -293,8 +289,8 @@ const createLegend = function(mapLayer, width, height, maxNum, minNum, meanNum, 
                             .domain(domain)
                             .range(range);
 
-    mapLayer.select('g').remove();
-    const legend = mapLayer.append("g")
+    legendLayer.select('g').remove();
+    const legend = legendLayer.append("g")
                             .attr("class", "quantize")
                             .attr("transform", "translate(" + width / 9 + "," + height / 2 + ")")
                             .style('font-family', 'Garamond')
